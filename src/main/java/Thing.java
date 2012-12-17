@@ -12,7 +12,6 @@ public class Thing {
     private Game game;
     private ThingBehavior behavior;
 
-    private int rl,rt;
     public Thing(Game game) {
 	this.game = game;
 	reset();
@@ -23,16 +22,29 @@ public class Thing {
 	    this.kill();
 	y+=10;
 	rect.y = y;
+
+	paintPresent(g, clicked, behavior.getRibbonColor(), behavior.getColor(), x, y, w, h);
+    }
+    
+    static void paintPresent(Graphics g, boolean clicked, Color ribbonColor, Color wrappingColor, int x, int y, int w, int h) {
 	if (!clicked)
-	    g.setColor(behavior.getColor());
+	    g.setColor(wrappingColor);
 	else
 	    g.setColor(Color.BLACK);
 	g.fillRect(x,y,w,h);
 
-	g.setColor(behavior.getRibbonColor());
-	g.fillRect(x, y+rt, w, 20);
-	g.fillRect(x+rl, y, 20, h);
-
+	g.setColor(ribbonColor);
+	int r = 20;
+	if (h <= 20 || w <= 20)
+	    r = 6;
+	if (h < 40 || w < 40) 
+	    r= 10;
+	
+	
+	int rl = w/2 -r/2;
+	int rt = h/2 -r/2;
+	g.fillRect(x, y+rt, w, r);
+	g.fillRect(x+rl, y, r, h);	
     }
 
     public void give(Child c) {
@@ -66,12 +78,14 @@ public class Thing {
 	    x = (int)(Math.random() * (1000.0-w));
 	} while (game.nearest(x).finished() && game.living_children.size() > 0);
 	y = 0;
-	rl = w/2 -10;
-	rt = h/2 -10;
 	rect = new Rectangle(x,y,w,h);
 	alive = true;
 	clicked = false;
 	behavior = game.getRandomBehaviour();
+    }
+
+    public ThingBehavior getBehavior() {
+	return this.behavior;
     }
 
 }

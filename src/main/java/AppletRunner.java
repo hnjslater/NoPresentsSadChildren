@@ -1,11 +1,12 @@
 
 import java.applet.Applet;
-import java.applet.AudioClip;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -15,25 +16,29 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
+import javax.swing.Timer;
 
-public class AppletRunner extends Applet implements MouseListener{
+public class AppletRunner extends Applet implements MouseListener {
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    private Canvas c = new Canvas();
-    Game game = new Game();
+    Game game;
     Image bg, win, lose;
     int frames = 0;
-    public AppletRunner() {
+    private Canvas c = new Canvas(); 
+    Timer t;
+
+    @Override
+    public void init() {
+	c = new Canvas();
 	c.setMinimumSize(new Dimension(1000, 700));
 	c.setPreferredSize(new Dimension(1000, 700));
 	this.add(c);
 	c.addMouseListener(this);
-    }
-    public void init() {
-	
+	game = new Game();
+
 	java.io.InputStream is1 = getClass().getResourceAsStream("background.png");
 	java.io.InputStream is2 = getClass().getResourceAsStream("fail.png");
 	java.io.InputStream is3 = getClass().getResourceAsStream("win.png");
@@ -45,24 +50,34 @@ public class AppletRunner extends Applet implements MouseListener{
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
+	c.createBufferStrategy(2);
+	setIgnoreRepaint(true);
     }
     @Override
     public void start() {
-	c.createBufferStrategy(2);
-	javax.swing.Timer t = new javax.swing.Timer(100, new ActionListener() {
+
+	t = new javax.swing.Timer(100, new ActionListener() {
 	    public void actionPerformed(ActionEvent e) {
+
 		frames++;
 		BufferStrategy bc = c.getBufferStrategy();
 		Graphics g = bc.getDrawGraphics();
 		g.drawImage(bg, 0, 0, null);
 		if (frames > 600 && !game.living_children.isEmpty()) {
+		    
 		    g.drawImage(win, 0, 0, null);
 
 		}
-		
-		
+
+
 		else if (!game.living_children.isEmpty()) {
-		    if (frames % 50 == 0) 
+		    
+			((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		    g.setColor(Color.RED);
+		    g.setFont(getFont().deriveFont((float) 30.0));
+		    g.drawString(Integer.toString(60-(frames/10)), 10, 30);
+		    if (frames % 40 == 0) 
 			game.things.add(new Thing(game));
 		    if (frames % 300 == 0)
 			game.nextLevel();
@@ -106,8 +121,11 @@ public class AppletRunner extends Applet implements MouseListener{
 	    }
 	});
 
-	t.start();
+	t.start(); 
     }
+
+
+
     public void mouseClicked(MouseEvent e) {
 
     }
